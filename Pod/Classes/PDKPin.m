@@ -8,6 +8,8 @@
 #import "PDKImageInfo.h"
 #import "PDKUser.h"
 
+#import "PDKUtils.h"
+
 @interface PDKPin()
 @property (nonatomic, copy, readwrite) NSURL *url;
 @property (nonatomic, copy, readwrite) NSString *descriptionText;
@@ -97,12 +99,12 @@ static NSString * const kPDKPinterestWebPinItURLString = @"http://www.pinterest.
     
     NSString *appName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleDisplayName"];
     
-    NSDictionary *params = @{@"app_id" : [PDKClient sharedInstance].appId,
-                             @"image_url" : [imageURL absoluteString],
-                             @"source_url" : [sourceURL absoluteString],
-                             @"app_name" : appName,
-                             @"suggested_board_name" : suggestedBoardName,
-                             @"description" : pinDescription,
+    NSDictionary *params = @{@"app_id" : PDKSaveString([PDKClient sharedInstance].appId),
+                             @"image_url" : PDKSaveString(imageURL.absoluteString),
+                             @"source_url" : PDKSaveString(sourceURL.absoluteString),
+                             @"app_name" : PDKSaveString(appName),
+                             @"suggested_board_name" : PDKSaveString(suggestedBoardName),
+                             @"description" : PDKSaveString(pinDescription),
                              };
     
     // check to see if the Pinterest app is installed
@@ -112,9 +114,9 @@ static NSString * const kPDKPinterestWebPinItURLString = @"http://www.pinterest.
         [[UIApplication sharedApplication] openURL:pinitURL];
     } else {
         //open web pinit url
-        NSDictionary *webParams = @{@"url": [sourceURL absoluteString],
-                                    @"media": [imageURL absoluteString],
-                                    @"description": pinDescription};
+        NSDictionary *webParams = @{@"url": PDKSaveString(sourceURL.absoluteString),
+                                    @"media": PDKSaveString(imageURL.absoluteString),
+                                    @"description": PDKSaveString(pinDescription)};
         NSURL *pinitWebURL = [NSURL URLWithString:[NSString stringWithFormat:@"%@?%@", kPDKPinterestWebPinItURLString, [webParams _PDK_queryStringValue]]];
         [[UIApplication sharedApplication] openURL:pinitWebURL];
     }

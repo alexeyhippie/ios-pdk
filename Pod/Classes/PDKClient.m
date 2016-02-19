@@ -12,6 +12,8 @@
 #import "PDKResponseObject.h"
 #import "PDKUser.h"
 
+#import "PDKUtils.h"
+
 #import <SSKeychain/SSKeychain.h>
 
 NSString * const PDKClientReadPublicPermissions = @"read_public";
@@ -82,8 +84,8 @@ static NSString * const kPDKPinterestWebOAuthURLString = @"https://api.pinterest
           andFailure:(PDKClientFailure)failureBlock
 {
     [[[self class] sharedInstance] getPath:@"oauth/inspect"
-                                parameters:@{@"access_token":oauthToken,
-                                             @"token":oauthToken}
+                                parameters:@{@"access_token":PDKSaveString(oauthToken),
+                                             @"token":PDKSaveString(oauthToken)}
                                withSuccess:successBlock
                                 andFailure:failureBlock];
     
@@ -204,9 +206,9 @@ static NSString * const kPDKPinterestWebOAuthURLString = @"https://api.pinterest
             appName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleName"];
         }
         
-        NSDictionary *params = @{@"client_id" : self.appId,
-                                 @"permissions" : permissionsString,
-                                 @"app_name" : appName
+        NSDictionary *params = @{@"client_id" : PDKSaveString(self.appId),
+                                 @"permissions" : PDKSaveString(permissionsString),
+                                 @"app_name" : PDKSaveString(appName)
                                  };
         
         // check to see if the Pinterest app is installed
@@ -217,9 +219,9 @@ static NSString * const kPDKPinterestWebOAuthURLString = @"https://api.pinterest
             [[UIApplication sharedApplication] openURL:oauthURL];
         } else {
             NSString *redirectURL = [NSString stringWithFormat:@"pdk%@://", self.appId];
-            params = @{@"client_id" : self.appId,
-                       @"scope" : permissionsString,
-                       @"redirect_uri" : redirectURL,
+            params = @{@"client_id" : PDKSaveString(self.appId),
+                       @"scope" : PDKSaveString(permissionsString),
+                       @"redirect_uri" : PDKSaveString(redirectURL),
                        @"response_type": @"token",
                        };
             
@@ -229,9 +231,9 @@ static NSString * const kPDKPinterestWebOAuthURLString = @"https://api.pinterest
         }
 #else
         NSString *redirectURL = [NSString stringWithFormat:@"pdk%@://", self.appId];
-        params = @{@"client_id" : self.appId,
-                   @"scope" : permissionsString,
-                   @"redirect_uri" : redirectURL,
+        params = @{@"client_id" : PDKSaveString(self.appId),
+                   @"scope" : PDKSaveString(permissionsString),
+                   @"redirect_uri" : PDKSaveString(redirectURL),
                    @"response_type": @"token",
                    };
         
@@ -404,7 +406,7 @@ static NSString * const kPDKPinterestWebOAuthURLString = @"https://api.pinterest
     NSMutableDictionary *signedParameters = [NSMutableDictionary dictionaryWithDictionary:parameters];
     
     if (self.oauthToken && signedParameters[@"access_token"] == nil) {
-        signedParameters[@"access_token"] = self.oauthToken;
+        signedParameters[@"access_token"] = PDKSaveString(self.oauthToken);
     }
     
     NSMutableURLRequest *request = [self.requestSerializer requestWithMethod:method
@@ -427,7 +429,7 @@ static NSString * const kPDKPinterestWebOAuthURLString = @"https://api.pinterest
     NSAssert(self.oauthToken, @"self.oauthToken cannot be nil");
     
     NSMutableDictionary *signedParameters = [NSMutableDictionary dictionaryWithDictionary:parameters];
-    signedParameters[@"access_token"] = self.oauthToken;
+    signedParameters[@"access_token"] = PDKSaveString(self.oauthToken);
     
     NSMutableURLRequest *request = [self.requestSerializer multipartFormRequestWithMethod:method
                                                                                 URLString:[[NSURL URLWithString:URLString relativeToURL:self.baseURL] absoluteString]
@@ -554,8 +556,8 @@ static NSString * const kPDKPinterestWebOAuthURLString = @"https://api.pinterest
         description = @"";
     }
     NSDictionary *parameters = @{
-                                 @"name" : boardName,
-                                 @"description" : description
+                                 @"name" : PDKSaveString(boardName),
+                                 @"description" : PDKSaveString(description)
                                  };
     
     [self postPath:path parameters:parameters withSuccess:successBlock andFailure:failureBlock];
@@ -585,10 +587,10 @@ static NSString * const kPDKPinterestWebOAuthURLString = @"https://api.pinterest
     NSAssert(boardId, @"boardId cannot be nil");
     
     NSDictionary *parameters = @{
-                                 @"image_url" : imageURL,
-                                 @"link" : link.absoluteString,
-                                 @"board" : boardId,
-                                 @"note" : pinDescription
+                                 @"image_url" : imageURL ? imageURL : @"",
+                                 @"link" : PDKSaveString(link.absoluteString),
+                                 @"board" : PDKSaveString(boardId),
+                                 @"note" : PDKSaveString(pinDescription)
                                  };
     
     [self createPinWithParameters:parameters withSuccess:successBlock andFailure:failureBlock];
@@ -640,8 +642,8 @@ static NSString * const kPDKPinterestWebOAuthURLString = @"https://api.pinterest
     };
     
     NSMutableDictionary *parameters = [NSMutableDictionary dictionary];
-    parameters[@"board"] = boardId;
-    parameters[@"note"] = pinDescription;
+    parameters[@"board"] = PDKSaveString(boardId);
+    parameters[@"note"] = PDKSaveString(pinDescription);
     if (link != nil) {
         parameters[@"link"] = link;
     }
