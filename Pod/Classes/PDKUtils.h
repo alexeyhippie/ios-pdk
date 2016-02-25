@@ -8,10 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
-#define PDKSaveString(astring) [PDKUtils safeString:astring]
+#define PDKSafeString(aString) aString ? aString : @""
 
 @interface PDKUtils : NSObject
-
-+ (NSString *)safeString:(NSString *)aString;
 
 @end

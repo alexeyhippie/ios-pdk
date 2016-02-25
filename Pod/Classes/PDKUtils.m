@@ -10,9 +10,4 @@
 
 @implementation PDKUtils
 
-+ (NSString *)safeString:(NSString *)aString {
-    if (aString) {return aString;}
-    else {return @"";}
-}
-
 @end
